@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML to Vercel Deployer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-400">Deploy to Vercel</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm mb-1">Project Name</label>
+                <input type="text" id="projectName" placeholder="my-awesome-site" 
+                    class="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1">File (HTML or ZIP)</label>
+                <input type="file" id="fileInput" accept=".html,.zip"
+                    class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+            </div>
+
+            <button onclick="handleDeploy()" id="deployBtn" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition duration-200">
+                Deploy Sekarang
+            </button>
+        </div>
+
+        <div id="status" class="mt-6 hidden">
+            <p id="statusText" class="text-center text-sm mb-2"></p>
+            <div id="resultUrl" class="hidden">
+                <a href="#" target="_blank" class="block text-center bg-blue-500 p-2 rounded text-white font-medium">Buka Website</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleDeploy() {
+            const name = document.getElementById('projectName').value;
+            const fileInput = document.getElementById('fileInput');
+            const btn = document.getElementById('deployBtn');
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            const resultUrl = document.getElementById('resultUrl');
+
+            if (!name || !fileInput.files[0]) {
+                alert("Isi nama project dan pilih file!");
+                return;
+            }
+
+            // UI Loading
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            statusDiv.classList.remove('hidden');
+            statusText.innerText = "Sedang mengupload dan men-deploy...";
+            resultUrl.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('name', name);
+
+            try {
+                const response = await fetch('/api/deploy', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusText.innerText = "✅ Berhasil di-deploy!";
+                    resultUrl.classList.remove('hidden');
+                    resultUrl.querySelector('a').href = 'https://' + data.url;
+                } else {
+                    statusText.innerText = "❌ Gagal: " + data.message;
+                }
+            } catch (err) {
+                statusText.innerText = "❌ Terjadi kesalahan jaringan.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Deploy Sekarang";
+            }
+        }
+    </script>
+</body>
+  </html>
+  
