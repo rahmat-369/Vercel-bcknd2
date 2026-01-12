@@ -1,3 +1,4 @@
+
 const Busboy = require('busboy');
 const AdmZip = require('adm-zip');
 
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
   let contentType = '';
 
   busboy.on('field', (name, val) => {
-    if (name === 'name') projectName = val.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (name === 'name') projectName = val.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
   });
 
   busboy.on('file', (name, file, info) => {
@@ -32,13 +33,14 @@ export default async function handler(req, res) {
 
   busboy.on('finish', async () => {
     try {
-      if (!projectName) throw new Error("Nama project wajib diisi!");
+      if (!projectName) throw new Error("Nama project wajib diisi");
 
       let filesToDeploy = [];
 
       if (contentType === 'application/zip' || fileName.endsWith('.zip')) {
         const zip = new AdmZip(fileBuffer);
         const zipEntries = zip.getEntries();
+
         zipEntries.forEach(entry => {
           if (!entry.isDirectory && !entry.entryName.includes('__MACOSX')) {
             filesToDeploy.push({
@@ -49,15 +51,9 @@ export default async function handler(req, res) {
           }
         });
       } else {
-        let rawContent = fileBuffer.toString('utf-8');
-        
-        if (rawContent.includes('eval(function') && !rawContent.includes('<html')) {
-          rawContent = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><script>${rawContent}</script></body></html>`;
-        }
-
         filesToDeploy.push({
           file: 'index.html',
-          data: Buffer.from(rawContent).toString('base64'),
+          data: fileBuffer.toString('base64'),
           encoding: 'base64'
         });
       }
@@ -70,7 +66,6 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           name: projectName,
-          target: 'production', 
           files: filesToDeploy,
           projectSettings: { framework: null }
         })
@@ -78,17 +73,23 @@ export default async function handler(req, res) {
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error?.message || "Gagal deploy");
+      if (!response.ok) {
+        throw new Error(data.error?.message || "Gagal deploy ke Vercel");
+      }
 
       return res.status(200).json({
         success: true,
-        url: `${projectName}.vercel.app`
+        url: data.url
       });
 
     } catch (error) {
-      return res.status(500).json({ success: false, message: error.message });
+      console.error("Deploy Error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: error.message
+      });
     }
   });
 
   req.pipe(busboy);
-    }
+}
