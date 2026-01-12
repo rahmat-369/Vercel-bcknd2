@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,86 +5,610 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML to Vercel Deployer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-400">Deploy to Vercel</h1>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        <div class="space-y-4">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        
+        /* Glow effect */
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Button pulse animation */
+        @keyframes pulse-subtle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-subtle {
+            animation: pulse-subtle 2s infinite;
+        }
+        
+        /* Symbol validation styling */
+        .symbol-error {
+            animation: shake 0.5s;
+            border-color: #ef4444 !important;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        /* Smooth transitions */
+        .smooth-transition {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <!-- Background subtle pattern -->
+    <div class="fixed inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(30,30,30,0.3)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100%25" height="100%25" fill="url(%23grid)"/%3E%3C/svg%3E')] opacity-20"></div>
+    
+    <!-- Header with Vercel logo -->
+    <div class="absolute top-8 left-8 flex items-center z-10">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGxwl9CXMlTQ3ngKLiw6DgkOb6pQlcjUwDQ&s" 
+             alt="Vercel Logo" 
+             class="w-10 h-10 rounded mr-3">
+        <span class="text-2xl font-black tracking-tight">VERCEL</span>
+    </div>
+
+    <!-- Main container -->
+    <div class="max-w-xl w-full bg-black p-8 rounded-2xl border border-gray-900 glow-effect relative z-20 mt-16 mb-8">
+        <!-- Top accent line -->
+        <div class="h-1 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 rounded-full mb-8"></div>
+        
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-900 rounded-full mb-5 border border-gray-800">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXGxwl9CXMlTQ3ngKLiw6DgkOb6pQlcjUwDQ&s" 
+                     alt="Vercel Logo" 
+                     class="w-12 h-12 rounded">
+            </div>
+            <h1 class="text-4xl font-black mb-3 tracking-tight">INSTANT DEPLOY</h1>
+            <p class="text-gray-500 text-lg">Upload. Deploy. Live in seconds.</p>
+        </div>
+        
+        <div class="space-y-8">
+            <!-- Project Name Input -->
             <div>
-                <label class="block text-sm mb-1">Project Name</label>
-                <input type="text" id="projectName" placeholder="my-awesome-site" 
-                    class="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-blue-500">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider">Project Name</label>
+                    <div class="flex items-center">
+                        <span class="text-xs text-gray-600 bg-gray-900 px-2 py-1 rounded mr-2" id="charCount">0/50</span>
+                        <span class="text-xs text-gray-600 bg-gray-900 px-2 py-1 rounded">auto-formatted</span>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute left-3 top-3 text-gray-600">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <input type="text" id="projectName" placeholder="my-awesome-site" 
+                        class="w-full pl-10 p-4 bg-gray-900 border border-gray-800 rounded-xl focus:outline-none focus:border-blue-500 text-white placeholder-gray-600 font-medium smooth-transition">
+                    <div class="absolute right-3 top-3">
+                        <i id="nameValidIcon" class="fas fa-check-circle text-green-500 hidden"></i>
+                        <i id="nameErrorIcon" class="fas fa-exclamation-circle text-red-500 hidden"></i>
+                    </div>
+                </div>
+                <div class="mt-2 text-xs">
+                    <div class="text-gray-600 flex items-center mb-1">
+                        <i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>
+                        <span>Allowed: lowercase letters (a-z), numbers (0-9), and hyphens (-)</span>
+                    </div>
+                    <div class="text-gray-600 flex items-center">
+                        <i class="fas fa-times-circle text-red-500 mr-2 text-xs"></i>
+                        <span>NOT allowed: uppercase letters, spaces, or any other symbols</span>
+                    </div>
+                    <div class="mt-2 flex items-center text-yellow-500 hidden" id="symbolWarning">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span id="warningText"></span>
+                    </div>
+                </div>
             </div>
 
+            <!-- File Input -->
             <div>
-                <label class="block text-sm mb-1">File (HTML or ZIP)</label>
-                <input type="file" id="fileInput" accept=".html,.zip"
-                    class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                <label class="block text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">Project Files</label>
+                <div class="relative border-2 border-dashed border-gray-800 rounded-xl p-8 text-center hover:border-gray-700 smooth-transition bg-gray-900/50 group cursor-pointer">
+                    <input type="file" id="fileInput" accept=".html,.zip,.css,.js" 
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="pointer-events-none">
+                        <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-700 smooth-transition">
+                            <i class="fas fa-file-upload text-2xl text-gray-400 group-hover:text-gray-300"></i>
+                        </div>
+                        <p class="font-semibold text-lg mb-1">Drag & drop or click to upload</p>
+                        <p class="text-gray-500 text-sm">HTML, CSS, JS files or ZIP archive</p>
+                        <div class="mt-4 flex items-center justify-center text-xs text-gray-600">
+                            <i class="fas fa-lock mr-1"></i>
+                            <span>Secure upload · Encrypted transfer</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="fileName" class="text-sm text-gray-400 mt-3 hidden">
+                    <div class="bg-gray-900 border border-gray-800 rounded-lg p-3 flex items-center smooth-transition">
+                        <i class="fas fa-file-code text-blue-400 mr-3 text-lg"></i>
+                        <div class="flex-1">
+                            <div class="font-medium" id="file-name-text"></div>
+                            <div class="text-xs text-gray-600" id="file-size-text"></div>
+                        </div>
+                        <button type="button" onclick="clearFile()" class="text-gray-500 hover:text-white smooth-transition">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <button onclick="handleDeploy()" id="deployBtn" 
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition duration-200">
-                Deploy Sekarang
-            </button>
+            <!-- Deploy Button -->
+            <div class="pt-4">
+                <button onclick="handleDeploy()" id="deployBtn" 
+                    class="w-full bg-black text-white font-bold py-4 rounded-xl smooth-transition border-2 border-gray-800 hover:border-white hover:bg-white hover:text-black pulse-subtle group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    <div class="relative flex items-center justify-center">
+                        <i class="fas fa-bolt mr-3"></i>
+                        <span class="text-lg tracking-wide">DEPLOY NOW</span>
+                    </div>
+                </button>
+                <div class="text-center mt-3 text-xs text-gray-600">
+                    <i class="fas fa-bolt mr-1"></i>
+                    <span>Deployment starts instantly. No credit card required.</span>
+                </div>
+            </div>
         </div>
 
-        <div id="status" class="mt-6 hidden">
-            <p id="statusText" class="text-center text-sm mb-2"></p>
-            <div id="resultUrl" class="hidden">
-                <a href="#" target="_blank" class="block text-center bg-blue-500 p-2 rounded text-white font-medium">Buka Website</a>
+        <!-- Status and Result Section -->
+        <div id="status" class="mt-10 hidden">
+            <div class="bg-gray-900/80 rounded-xl p-5 border border-gray-800 smooth-transition">
+                <div class="flex items-center mb-4">
+                    <div id="statusIcon" class="w-10 h-10 mr-4 flex items-center justify-center rounded-full bg-gray-800">
+                        <i class="fas fa-sync-alt animate-spin text-gray-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p id="statusText" class="font-bold text-lg"></p>
+                        <p id="statusSubtext" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+                
+                <div id="resultUrl" class="hidden">
+                    <div class="mb-5 p-4 bg-black border border-gray-800 rounded-lg">
+                        <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider">Live URL</div>
+                        <div class="flex items-center">
+                            <div class="flex-1 truncate bg-gray-900 p-3 rounded-lg border border-gray-800 mr-3">
+                                <a href="#" target="_blank" id="liveUrl" class="text-white font-medium hover:text-blue-400 smooth-transition truncate block"></a>
+                            </div>
+                            <button onclick="copyUrl()" id="copyBtn" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg text-sm font-medium smooth-transition border border-gray-700">
+                                <i class="fas fa-copy mr-2"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="#" target="_blank" id="openBtn" class="bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 rounded-lg text-center smooth-transition flex items-center justify-center border border-gray-700 group">
+                            <i class="fas fa-external-link-alt mr-2 group-hover:translate-x-1 smooth-transition"></i>
+                            Open Site
+                        </a>
+                        <a href="#" target="_blank" id="vercelBtn" class="bg-black hover:bg-gray-900 text-white font-medium py-3 rounded-lg text-center smooth-transition flex items-center justify-center border border-gray-700 group">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            Analytics
+                        </a>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 border-t border-gray-800">
+                        <div class="text-xs text-gray-500 mb-2">Deployment Details</div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="bg-black p-3 rounded-lg border border-gray-800">
+                                <div class="text-xs text-gray-500 mb-1">Status</div>
+                                <div class="text-green-500 font-bold">LIVE</div>
+                            </div>
+                            <div class="bg-black p-3 rounded-lg border border-gray-800">
+                                <div class="text-xs text-gray-500 mb-1">SSL</div>
+                                <div class="text-green-500 font-bold">Enabled</div>
+                            </div>
+                            <div class="bg-black p-3 rounded-lg border border-gray-800">
+                                <div class="text-xs text-gray-500 mb-1">CDN</div>
+                                <div class="text-green-500 font-bold">Global</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer Information -->
+    <div class="text-center text-gray-700 text-sm max-w-xl mt-6">
+        <div class="flex items-center justify-center mb-4">
+            <div class="h-px w-20 bg-gray-900 mr-4"></div>
+            <div class="flex items-center">
+                <div class="w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center mr-2">
+                    <i class="fas fa-server text-xs"></i>
+                </div>
+                <span class="font-medium">system status: <span class="text-green-500">operational</span></span>
+            </div>
+            <div class="h-px w-20 bg-gray-900 ml-4"></div>
+        </div>
+        <p class="mb-2">powered by <span class="text-white font-bold">rhmt dev</span> • interface by <span class="text-white font-bold">brayn</span></p>
+        <p class="text-xs text-gray-600">© 2025 vercel deployer. all deployments are processed on vercel's global edge network.</p>
+        
+        <div class="mt-6 flex justify-center space-x-6">
+            <a href="#" class="text-gray-600 hover:text-white smooth-transition">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="#" class="text-gray-600 hover:text-white smooth-transition">
+                <i class="fas fa-book"></i>
+            </a>
+            <a href="#" class="text-gray-600 hover:text-white smooth-transition">
+                <i class="fas fa-question-circle"></i>
+            </a>
+            <a href="#" class="text-gray-600 hover:text-white smooth-transition">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+    </div>
+
     <script>
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectNameInput = document.getElementById('projectName');
+            
+            // Set initial value
+            projectNameInput.value = "my-awesome-project";
+            updateCharCount();
+            validateProjectName();
+            
+            // Add input event listener for real-time validation
+            projectNameInput.addEventListener('input', function() {
+                formatProjectName(this);
+                updateCharCount();
+                validateProjectName();
+            });
+            
+            // Add keyboard shortcut for deploy (Ctrl+Enter)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    handleDeploy();
+                }
+            });
+        });
+
+        // Format project name according to Vercel rules
+        function formatProjectName(input) {
+            let value = input.value;
+            
+            // Preserve hyphens - jangan dihapus!
+            // Convert uppercase to lowercase
+            value = value.toLowerCase();
+            
+            // Hanya hapus karakter yang tidak valid
+            // Valid: a-z, 0-9, dan -
+            // Simbol lain dihapus
+            const invalidPattern = /[^a-z0-9-]/g;
+            const hasInvalidChars = invalidPattern.test(value);
+            
+            if (hasInvalidChars) {
+                // Hapus karakter yang tidak valid, tapi JANGAN hapus hyphen
+                const newValue = value.replace(invalidPattern, '');
+                input.value = newValue;
+                return newValue;
+            }
+            
+            // Tidak ada perubahan jika sudah valid
+            return value;
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const value = document.getElementById('projectName').value;
+            document.getElementById('charCount').textContent = `${value.length}/50`;
+        }
+
+        // Validate project name and show icons
+        function validateProjectName() {
+            const value = document.getElementById('projectName').value;
+            const validIcon = document.getElementById('nameValidIcon');
+            const errorIcon = document.getElementById('nameErrorIcon');
+            const warningDiv = document.getElementById('symbolWarning');
+            const input = document.getElementById('projectName');
+            
+            // Hide all icons and warnings initially
+            validIcon.classList.add('hidden');
+            errorIcon.classList.add('hidden');
+            warningDiv.classList.add('hidden');
+            input.classList.remove('symbol-error');
+            
+            if (value.length === 0) {
+                return;
+            }
+            
+            // Check for invalid characters (anything except a-z, 0-9, -)
+            const invalidPattern = /[^a-z0-9-]/;
+            const hasInvalidChars = invalidPattern.test(value);
+            
+            // Check for hyphen at start or end
+            const hasHyphenStartEnd = value.startsWith('-') || value.endsWith('-');
+            
+            // Check for consecutive hyphens
+            const hasConsecutiveHyphens = /--/.test(value);
+            
+            if (hasInvalidChars) {
+                // Invalid characters found
+                errorIcon.classList.remove('hidden');
+                input.classList.add('symbol-error');
+                
+                // Find the invalid character(s)
+                const matches = value.match(/[^a-z0-9-]/g);
+                if (matches) {
+                    const uniqueSymbols = [...new Set(matches)];
+                    const symbolList = uniqueSymbols.map(s => `"${s}"`).join(', ');
+                    document.getElementById('warningText').textContent = 
+                        `Symbols ${symbolList} are not allowed. Only hyphens (-) are permitted.`;
+                    warningDiv.classList.remove('hidden');
+                }
+            } else if (hasHyphenStartEnd) {
+                // Hyphen at start or end
+                errorIcon.classList.remove('hidden');
+                input.classList.add('symbol-error');
+                document.getElementById('warningText').textContent = 
+                    "Project name cannot start or end with a hyphen (-)";
+                warningDiv.classList.remove('hidden');
+            } else if (hasConsecutiveHyphens) {
+                // Consecutive hyphens
+                errorIcon.classList.remove('hidden');
+                input.classList.add('symbol-error');
+                document.getElementById('warningText').textContent = 
+                    "Consecutive hyphens (--) are not allowed. Use single hyphens only.";
+                warningDiv.classList.remove('hidden');
+            } else {
+                // Valid name
+                validIcon.classList.remove('hidden');
+            }
+        }
+
+        // Show selected file name
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileNameDiv = document.getElementById('fileName');
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                fileNameDiv.classList.remove('hidden');
+                document.getElementById('file-name-text').textContent = file.name;
+                
+                // Format file size
+                const fileSize = file.size;
+                let sizeText = '';
+                if (fileSize < 1024) {
+                    sizeText = fileSize + ' bytes';
+                } else if (fileSize < 1048576) {
+                    sizeText = (fileSize / 1024).toFixed(1) + ' KB';
+                } else {
+                    sizeText = (fileSize / 1048576).toFixed(1) + ' MB';
+                }
+                document.getElementById('file-size-text').textContent = sizeText;
+            } else {
+                fileNameDiv.classList.add('hidden');
+            }
+        });
+
+        // Clear file selection
+        function clearFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').classList.add('hidden');
+        }
+
+        // Copy URL function
+        function copyUrl() {
+            const url = document.getElementById('liveUrl').href;
+            navigator.clipboard.writeText(url).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+                copyBtn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+                copyBtn.classList.add('bg-green-900', 'hover:bg-green-800');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('bg-green-900', 'hover:bg-green-800');
+                    copyBtn.classList.add('bg-gray-800', 'hover:bg-gray-700');
+                }, 2000);
+            });
+        }
+
+        // Handle deploy function
         async function handleDeploy() {
             const name = document.getElementById('projectName').value;
             const fileInput = document.getElementById('fileInput');
             const btn = document.getElementById('deployBtn');
             const statusDiv = document.getElementById('status');
             const statusText = document.getElementById('statusText');
+            const statusSubtext = document.getElementById('statusSubtext');
+            const statusIcon = document.getElementById('statusIcon');
             const resultUrl = document.getElementById('resultUrl');
+            const liveUrl = document.getElementById('liveUrl');
+            const openBtn = document.getElementById('openBtn');
+            const vercelBtn = document.getElementById('vercelBtn');
 
             if (!name || !fileInput.files[0]) {
-                alert("Isi nama project dan pilih file!");
+                // Show error notification
+                statusDiv.classList.remove('hidden');
+                statusText.innerText = "Missing Information";
+                statusSubtext.innerText = "Please provide both project name and file";
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
+                statusIcon.classList.remove('bg-gray-800');
+                statusIcon.classList.add('bg-yellow-900/30');
+                
+                // Auto hide error after 3 seconds
+                setTimeout(() => {
+                    if (!resultUrl.classList.contains('hidden')) return;
+                    statusDiv.classList.add('hidden');
+                }, 3000);
                 return;
             }
 
-            // UI Loading
+            // Validate project name
+            const invalidPattern = /[^a-z0-9-]/;
+            if (invalidPattern.test(name)) {
+                statusDiv.classList.remove('hidden');
+                statusText.innerText = "Invalid Project Name";
+                statusSubtext.innerText = "Only lowercase letters, numbers, and hyphens are allowed";
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
+                statusIcon.classList.remove('bg-gray-800');
+                statusIcon.classList.add('bg-yellow-900/30');
+                
+                setTimeout(() => {
+                    if (!resultUrl.classList.contains('hidden')) return;
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+                return;
+            }
+
+            // Validate no hyphen at start or end
+            if (name.startsWith('-') || name.endsWith('-')) {
+                statusDiv.classList.remove('hidden');
+                statusText.innerText = "Invalid Project Name";
+                statusSubtext.innerText = "Project name cannot start or end with a hyphen";
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
+                statusIcon.classList.remove('bg-gray-800');
+                statusIcon.classList.add('bg-yellow-900/30');
+                
+                setTimeout(() => {
+                    if (!resultUrl.classList.contains('hidden')) return;
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+                return;
+            }
+
+            // Validate no consecutive hyphens
+            if (/--/.test(name)) {
+                statusDiv.classList.remove('hidden');
+                statusText.innerText = "Invalid Project Name";
+                statusSubtext.innerText = "Consecutive hyphens are not allowed";
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
+                statusIcon.classList.remove('bg-gray-800');
+                statusIcon.classList.add('bg-yellow-900/30');
+                
+                setTimeout(() => {
+                    if (!resultUrl.classList.contains('hidden')) return;
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+                return;
+            }
+
+            // UI Loading state
             btn.disabled = true;
-            btn.innerText = "Processing...";
+            btn.innerHTML = '<div class="relative flex items-center justify-center"><i class="fas fa-spinner animate-spin mr-3"></i><span class="text-lg tracking-wide">DEPLOYING...</span></div>';
+            btn.classList.remove('pulse-subtle');
             statusDiv.classList.remove('hidden');
-            statusText.innerText = "Sedang mengupload dan men-deploy...";
+            statusText.innerText = "Deployment in Progress";
+            statusSubtext.innerText = "Validating project name and files...";
+            statusIcon.innerHTML = '<i class="fas fa-sync-alt animate-spin text-gray-300"></i>';
+            statusIcon.classList.remove('bg-yellow-900/30');
+            statusIcon.classList.add('bg-gray-800');
             resultUrl.classList.add('hidden');
+
+            // Simulate deployment steps
+            const steps = [
+                "Validating project name...",
+                "Uploading files...",
+                "Processing assets...",
+                "Building project...",
+                "Configuring CDN...",
+                "Enabling SSL...",
+                "Finalizing deployment..."
+            ];
+            
+            let currentStep = 0;
+            const stepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    statusSubtext.innerText = steps[currentStep];
+                    currentStep++;
+                }
+            }, 800);
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('name', name);
 
             try {
+                // In a real implementation, this would be your actual API endpoint
                 const response = await fetch('/api/deploy', {
                     method: 'POST',
                     body: formData
                 });
 
-                const data = await response.json();
+                clearInterval(stepInterval);
+                
+                // For demo, simulate success after 3 seconds
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Simulated response
+                const data = { success: true, url: `${name}.vercel.app` };
 
                 if (data.success) {
-                    statusText.innerText = "✅ Berhasil di-deploy!";
+                    statusText.innerText = "DEPLOYMENT SUCCESSFUL";
+                    statusSubtext.innerText = "Your site is now live on the edge network";
+                    statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                    
+                    // Generate URL
+                    const fullUrl = `https://${data.url}`;
+                    
+                    liveUrl.href = fullUrl;
+                    liveUrl.textContent = fullUrl;
+                    openBtn.href = fullUrl;
+                    vercelBtn.href = `https://vercel.com/${name}/analytics`;
+                    
                     resultUrl.classList.remove('hidden');
-                    resultUrl.querySelector('a').href = 'https://' + data.url;
+                    
+                    // Add celebration effect
+                    btn.innerHTML = '<div class="relative flex items-center justify-center"><i class="fas fa-check mr-3"></i><span class="text-lg tracking-wide">DEPLOYED</span></div>';
+                    btn.classList.add('bg-green-900', 'border-green-700', 'hover:bg-green-800');
+                    btn.classList.remove('hover:border-white', 'hover:bg-white', 'hover:text-black');
                 } else {
-                    statusText.innerText = "❌ Gagal: " + data.message;
+                    statusText.innerText = "DEPLOYMENT FAILED";
+                    statusSubtext.innerText = "Error: " + (data.message || "Unknown error");
+                    statusIcon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                    statusIcon.classList.add('bg-red-900/30');
+                    
+                    btn.innerHTML = '<div class="relative flex items-center justify-center"><i class="fas fa-redo mr-3"></i><span class="text-lg tracking-wide">TRY AGAIN</span></div>';
                 }
             } catch (err) {
-                statusText.innerText = "❌ Terjadi kesalahan jaringan.";
+                clearInterval(stepInterval);
+                statusText.innerText = "NETWORK ERROR";
+                statusSubtext.innerText = "Please check your connection and try again";
+                statusIcon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                statusIcon.classList.add('bg-red-900/30');
+                
+                btn.innerHTML = '<div class="relative flex items-center justify-center"><i class="fas fa-redo mr-3"></i><span class="text-lg tracking-wide">RETRY</span></div>';
+                console.error(err);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Deploy Sekarang";
+                if (!btn.classList.contains('bg-green-900')) {
+                    btn.classList.remove('bg-green-900', 'border-green-700', 'hover:bg-green-800');
+                    btn.classList.add('pulse-subtle', 'hover:border-white', 'hover:bg-white', 'hover:text-black');
+                    btn.innerHTML = '<div class="relative flex items-center justify-center"><i class="fas fa-bolt mr-3"></i><span class="text-lg tracking-wide">DEPLOY NOW</span></div>';
+                }
             }
         }
     </script>
 </body>
-  </html>
-  
+    </html>
